@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Console &mdash; Produtos{% endblock %}
+{% block content %}
+
+<section class="shop-hero">
+  <div>
+    <p class="eyebrow">Console &middot; Opera&ccedil;&atilde;o</p>
+    <h1>Produtos rastreados</h1>
+    <p class="deck">
+      Gerencie o cat&aacute;logo, aprove listings pendentes e inspecione a
+      s&eacute;rie hist&oacute;rica de pre&ccedil;os por listing.
+    </p>
+    <p class="byline"><strong>Sess&atilde;o</strong> &middot; {{ edition_date }}</p>
+  </div>
+  {% if products %}
+  <div class="hero-stats">
+    <span>Produtos monitorados</span>
+    <strong>{{ "%02d"|format(products|length) }}</strong>
+    <span>Vis&atilde;o p&uacute;blica em /public/</span>
+  </div>
+  {% endif %}
+</section>
+
+{% if not products %}
+<p class="empty">Nenhum produto ainda. Rode <code>python -m comparador track</code> primeiro.</p>
+{% else %}
+
+<div class="section-heading">
+  <div>
+    <p class="eyebrow">Cat&aacute;logo</p>
+    <h2>Todos os produtos</h2>
+  </div>
+  <span class="trend-pill">{{ products|length }} registros</span>
+</div>
+
+<table class="products">
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th class="num">Listings</th>
+      <th class="num">Menor pre&ccedil;o</th>
+      <th>Loja</th>
+      <th>Atualizado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in products %}
+    <tr>
+      <td><a href="/admin/product/{{ p.id }}">{{ p.display_name }}</a></td>
+      <td class="num mono">{{ "%02d"|format(p.listing_count) }}</td>
+      <td class="num price">
+        {% if p.best_price %}R$ {{ "%.2f"|format(p.best_price) }}{% else %}&mdash;{% endif %}
+      </td>
+      <td>
+        {% if p.best_site %}
+          <span class="site-badge site-{{ p.best_site }}">{{ p.best_site }}</span>
+        {% else %}&mdash;{% endif %}
+      </td>
+      <td class="date">{{ p.last_updated[:16].replace('T', ' ') if p.last_updated else "—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

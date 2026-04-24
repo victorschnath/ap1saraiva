@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ product.display_name }} &mdash; Console{% endblock %}
+{% block content %}
+
+<nav class="breadcrumb">&larr; <a href="/admin/">Console</a></nav>
+
+<section class="product-hero">
+  <div>
+    <p class="eyebrow">Console &middot; Detalhe</p>
+    <h1>{{ product.display_name }}</h1>
+    {% if product.reference_model %}
+    <p class="deck">modelo &middot; <code>{{ product.reference_model }}</code></p>
+    {% endif %}
+  </div>
+  {% if listings %}
+  <div class="best-price-card">
+    <p class="kicker">Listings</p>
+    <strong>{{ "%02d"|format(listings|length) }}</strong>
+    <small>pendentes + ativos + arquivados</small>
+  </div>
+  {% endif %}
+</section>
+
+<section class="offers-section">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Listings</p>
+      <h2>Gerenciar observa&ccedil;&atilde;o</h2>
+    </div>
+  </div>
+
+  {% if not listings %}
+  <p class="empty">Sem listings ainda.</p>
+  {% else %}
+  <div class="listings-grid">
+    {% for l in listings %}
+    <article class="listing-card status-{{ l.link_status }}" style="--card-i: {{ loop.index0 }}">
+      <header>
+        <span class="site-badge site-{{ l.site }}">{{ l.site }}</span>
+        <span class="status status-{{ l.link_status }}">{{ l.link_status }}</span>
+      </header>
+      {% if l.image_url %}
+        <img class="thumb" src="{{ l.image_url }}" alt="" loading="lazy">
+      {% endif %}
+      <h3><a href="{{ l.url }}" target="_blank" rel="noopener">{{ l.title }}</a></h3>
+      <div class="price-block">
+        {% if l.current_price %}
+          <span class="current">R$ {{ "%.2f"|format(l.current_price) }}</span>
+          {% if l.original_price and l.original_price > l.current_price %}
+            <s class="original">R$ {{ "%.2f"|format(l.original_price) }}</s>
+          {% endif %}
+        {% else %}
+          <span class="unavailable">sem pre&ccedil;o</span>
+        {% endif %}
+      </div>
+      <dl class="meta">
+        <dt>Match</dt><dd>{{ "%.0f"|format(l.match_score) }}</dd>
+        {% if l.seller %}<dt>Vendedor</dt><dd>{{ l.seller }}</dd>{% endif %}
+        <dt>ID</dt><dd><code>{{ l.site_id }}</code></dd>
+        <dt>Atualizado</dt><dd>{{ l.last_fetched_at[:16].replace('T', ' ') if l.last_fetched_at else "—" }}</dd>
+      </dl>
+
+      <div class="actions">
+        {% if l.link_status == 'pending' %}
+          <form method="post" action="/admin/listing/{{ l.id }}/confirm">
+            <button class="confirm" type="submit">Confirmar</button>
+          </form>
+          <form method="post" action="/admin/listing/{{ l.id }}/reject">
+            <button class="reject" type="submit">Rejeitar</button>
+          </form>
+        {% elif l.link_status in ['auto', 'confirmed'] %}
+          <form method="post" action="/admin/listing/{{ l.id }}/unobserve">
+            <button class="reject" type="submit">Parar de observar</button>
+          </form>
+        {% elif l.link_status == 'rejected' %}
+          <form method="post" action="/admin/listing/{{ l.id }}/reactivate">
+            <button class="confirm" type="submit">Reativar</button>
+          </form>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

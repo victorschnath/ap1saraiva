@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Autenticar &mdash; Console{% endblock %}
+{% block content %}
+<div class="login-card">
+  <p class="eyebrow">Acesso restrito &middot; console</p>
+  <h1>Autentica&ccedil;&atilde;o</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post" action="/admin/login">
+    <label>Email
+      <input type="email" name="email" required autocomplete="email" autofocus>
+    </label>
+    <label>Senha
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button type="submit">Entrar no console</button>
+  </form>
+</div>
+{% endblock %}
